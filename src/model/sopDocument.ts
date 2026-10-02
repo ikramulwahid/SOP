@@ -233,10 +233,11 @@ function validateBlock(block: unknown, path: string, errors: string[]): void {
         break;
       }
       const rowArrays = block.rows as unknown[][];
-      if (Array.isArray(block.headers) && rowArrays.some(row => row.length !== block.headers.length)) {
+      const headerCells = Array.isArray(block.headers) ? block.headers : undefined;
+      if (headerCells && rowArrays.some(row => row.length !== headerCells.length)) {
         errors.push(`${path}.rows must match the number of header columns.`);
       }
-      if (!Array.isArray(block.headers) && rowArrays.length > 0) {
+      if (!headerCells && rowArrays.length > 0) {
         const width = rowArrays[0].length;
         if (rowArrays.some(row => row.length !== width)) {
           errors.push(`${path}.rows must have a consistent column count.`);
