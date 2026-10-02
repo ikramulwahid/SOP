@@ -209,6 +209,83 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
         }
         currentStepList = [];
         currentStageName = subTitle;
+      } else if (currentSection === 'calculation') {
+        if (currentFormula) {
+          calculations.push({
+            name: currentCalcName,
+            formula: currentFormula.replace(/\$\$/g, '').trim(),
+            variables: [...currentCalcVariables]
+          });
+          currentFormula = '';
+          currentCalcVariables = [];
+        }
+        currentCalcName = subTitle;
+      }
+      continue;
+    }
+
+    // Fill content according to currentSection
+    if (currentSection === 'purpose') {
+      purpose = purpose ? `${purpose} ${line}` : line;
+    } else if (currentSection === 'scope') {
+      scope = scope ? `${scope} ${line}` : line;
+    } else if (currentSection === 'definitions') {
+      const defMatch = line.match(/\*\*([^*]+)\*\*\s*[:：]\s*(.*)/);
+      if (defMatch) {
+        definitions.push({
+          term: defMatch[1].trim(),
+          definition: defMatch[2].trim()
+        });
+      } else if (line.includes(':')) {
+        const parts = line.split(':');
+        definitions.push({
+          term: parts[0].replace(/[-*]/g, '').trim(),
+          definition: parts.slice(1).join(':').trim()
+        });
+      }
+    } else if (currentSection === 'safety') {
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        const bulletText = line.replace(/^[-*]\s+/, '').trim();
+        safetyPrecautions.push({
+          title: bulletText.split(/[,:.]/)[0].trim(),
+          desc: bulletText,
+          level: bulletText.toLowerCase().includes('must') || bulletText.toLowerCase().includes('ppe') || bulletText.toLowerCase().includes('hazard') || bulletText.toLowerCase().includes('goggles') ? 'Mandatory' : 'Standard'
+        });
+      }
+    } else if (currentSection === 'apparatus') {
+      if (line.startsWith('- ') || line.startsWith('* ')) {
+        const bullet = line.replace(/^[-*]\s+/, '').trim();
+        const boldMatch = bullet.match(/\*\*([^*]+)\*\*\s*[:：]?\s*(.*)/);
+        if (boldMatch) {
+          apparatus.push({
+            name: boldMatch[1].trim(),
+            spec: boldMatch[2].trim()
+          });
+        } else if (bullet.includes(':')) {
+          const [n, ...rest] = bullet.split(':');
+          apparatus.push({
+            name: n.trim(),
+            spec: rest.join(':').trim(),
+          });
+        }
+      }
+    } else if (currentSection === 'reagents') {
+      reagents = reagents ? reagents + ' ' + line : line;
+    } else if (currentSection === 'sampleHandling') {
+      sampleHandling = sampleHandling ? `${sampleHandling} ${line}` : line;
+    } else if (currentSection === 'procedure') {
+      const stepMatch = line.match(/^(\d+)\.\s+(.*)/);
+      if (stepMatch) {
+        const stepNum = parseInt(stepMatch[1], 10);
+        const fullStepText = stepMatch[2].trim();
+        const titleMatch = fullStepText.match(/\(([^)]+)\)/);
+        const title = titleMatch ? titleMatch[1].trim() : '';
+        currentStepList.push({
+          step: stepNum,
+          title: title,
+          text: fullStepText
+        });
+      }
     } else if (currentSection === 'calculation') {
       const variableMatch = line.match(/^[-*]\s+([^=]+?)\s*=\s*(.*)$/);
       if (variableMatch) {
