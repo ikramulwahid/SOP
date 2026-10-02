@@ -232,12 +232,13 @@ function validateBlock(block: unknown, path: string, errors: string[]): void {
         errors.push(`${path}.rows must be an array of string arrays.`);
         break;
       }
-      if (Array.isArray(block.headers) && block.rows.some(row => row.length !== block.headers!.length)) {
+      const rowArrays = block.rows as unknown[][];
+      if (Array.isArray(block.headers) && rowArrays.some(row => row.length !== block.headers.length)) {
         errors.push(`${path}.rows must match the number of header columns.`);
       }
-      if (!Array.isArray(block.headers) && block.rows.length > 0) {
-        const width = block.rows[0].length;
-        if (block.rows.some(row => row.length !== width)) {
+      if (!Array.isArray(block.headers) && rowArrays.length > 0) {
+        const width = rowArrays[0].length;
+        if (rowArrays.some(row => row.length !== width)) {
           errors.push(`${path}.rows must have a consistent column count.`);
         }
       }
