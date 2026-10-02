@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { AlertTriangle, CheckCircle2, FileCog, SlidersHorizontal } from 'lucide-react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, CheckCircle2, FileCog, ImagePlus, SlidersHorizontal } from 'lucide-react';
 import type { SOPBlock, SOPDocument, SOPSection } from '../../model/sopDocument';
 import { validateSOPDocument } from '../../model/sopDocument';
 import {
@@ -19,6 +19,7 @@ import {
   updateSection,
   updateStyle
 } from '../../model/sopDocumentEditor';
+import { createAssetId, readImageFileAsAsset } from '../../model/sopDocumentFile';
 import { SopMetadataEditor } from './SopMetadataEditor';
 import { SopRevisionHistoryEditor } from './SopRevisionHistoryEditor';
 import { SopSectionEditor } from './SopSectionEditor';
@@ -77,6 +78,7 @@ export const SopEditorWorkspace: React.FC<Props> = ({ document, onChange }) => {
   const [showStyle, setShowStyle] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showAssets, setShowAssets] = useState(false);
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
   const [assetForm, setAssetForm] = useState({
     id: '',
     filename: '',
@@ -220,6 +222,30 @@ export const SopEditorWorkspace: React.FC<Props> = ({ document, onChange }) => {
     }
   };
 
+  const addEmbeddedImage = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file) return;
+    if (!activeSection) {
+      setErrorMessage('Select a section before inserting an image.');
+      return;
+    }
+
+    try {
+      const assetId = createAssetId(document.assets.map(asset => asset.id));
+      const asset = await readImageFileAsAsset(file, assetId);
+      let next = addAssetReference(document, asset);
+      next = addBlock(next, activeSection.id, { type: 'image', assetId });
+      onChange(next);
+      setActiveBlockIndex(activeSection.blocks.length);
+      setShowAssets(true);
+      setErrorMessage('');
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'The selected image could not be added.');
+    }
+  };
+
   const stylePatch = (patch: Partial<SOPDocument['style']>) => {
     const next = perform(() => updateStyle(document, patch));
     if (!next) return;
@@ -359,7 +385,7 @@ export const SopEditorWorkspace: React.FC<Props> = ({ document, onChange }) => {
             <section className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
               <h2 className="text-sm font-semibold text-slate-900">Document assets</h2>
               <p className="mt-1 text-xs text-slate-500">
-                Reference-only asset entries; actual file handling is deferred to WP-04.
+                Reference assets may be added manually. Embedded image files are stored inside the SOP document.
               </p>
               <div className="mt-3 grid gap-2 md:grid-cols-4">
                 {(['id', 'filename', 'mediaType', 'reference'] as const).map(field => (
@@ -373,19 +399,37 @@ export const SopEditorWorkspace: React.FC<Props> = ({ document, onChange }) => {
                   </label>
                 ))}
               </div>
-              <button
-                type="button"
-                onClick={addAsset}
-                className="mt-3 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
-              >
-                Add asset reference
-              </button>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={addAsset}
+                  className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+                >
+                  Add asset reference
+                </button>
+                <button
+                  type="button"
+                  onClick={() => imageFileInputRef.current?.click()}
+                  disabled={!activeSection}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <ImagePlus className="h-3.5 w-3.5" /> Insert image from file
+                </button>
+                <input
+                  ref={imageFileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  onChange={addEmbeddedImage}
+                  aria-label="Choose an image file to embed in the current SOP"
+                />
+              </div>
               <div className="mt-3 space-y-2">
                 {document.assets.map(asset => (
                   <div key={asset.id} className="rounded border border-slate-200 bg-slate-50 px-3 py-2 text-xs">
                     <span className="font-semibold">{asset.filename}</span>
                     <span className="ml-2 text-slate-500">
-                      {asset.mediaType} · {asset.reference ?? 'embedded data'}
+                      {asset.mediaType} · {asset.data ? 'embedded image data' : asset.reference ?? 'reference'}
                     </span>
                   </div>
                 ))}

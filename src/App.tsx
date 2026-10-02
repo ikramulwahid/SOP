@@ -2,11 +2,13 @@ import React, { useMemo, useState } from 'react';
 import { Eye, FileText, PlusCircle } from 'lucide-react';
 import { createEmptySOPDocument, serializeSOPDocument, type SOPDocument } from './model/sopDocument';
 import { SopEditorWorkspace } from './components/editor/SopEditorWorkspace';
+import { SopDocumentFileActions } from './components/editor/SopDocumentFileActions';
 
 export default function App() {
   const [initialDocument] = useState<SOPDocument>(() => createEmptySOPDocument());
   const [document, setDocument] = useState<SOPDocument>(initialDocument);
   const [baseline, setBaseline] = useState(() => serializeSOPDocument(initialDocument));
+  const [sourceFilename, setSourceFilename] = useState('');
 
   const dirty = useMemo(() => {
     try {
@@ -21,6 +23,7 @@ export default function App() {
     const next = createEmptySOPDocument();
     setDocument(next);
     setBaseline(serializeSOPDocument(next));
+    setSourceFilename('');
   };
 
   return (
@@ -56,6 +59,21 @@ export default function App() {
             >
               <PlusCircle className="h-3.5 w-3.5" /> New
             </button>
+            <SopDocumentFileActions
+              document={document}
+              dirty={dirty}
+              onOpenDocument={(next, filename) => {
+                if (dirty && !window.confirm('Open a different SOP and discard current unsaved changes?')) return false;
+                setDocument(next);
+                setBaseline(serializeSOPDocument(next));
+                setSourceFilename(filename);
+                return true;
+              }}
+              onSaved={filename => {
+                setBaseline(serializeSOPDocument(document));
+                setSourceFilename(filename);
+              }}
+            />
             <button
               type="button"
               disabled
@@ -71,7 +89,7 @@ export default function App() {
         <SopEditorWorkspace document={document} onChange={setDocument} />
       </main>
       <footer className="border-t border-slate-200 bg-white py-5 text-center text-[11px] text-slate-500">
-        Single-user SOP authoring workspace · in-memory editing only
+        Single-user SOP authoring workspace · local .sop.json files
       </footer>
     </div>
   );

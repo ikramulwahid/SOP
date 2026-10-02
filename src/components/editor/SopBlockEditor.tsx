@@ -169,7 +169,7 @@ export const SopBlockEditor: React.FC<Props> = ({
               <input value={block.altText ?? ''} onChange={e => onChange({ ...block, altText: e.target.value })} className={inputClass} />
             </label>
           </div>
-          <p className="text-[11px] text-slate-500">File selection and binary storage are deferred; this editor associates an image block with a document asset only.</p>
+          <p className="text-[11px] text-slate-500">Use the document Assets panel to insert and embed an image file, then select that asset here.</p>
         </div>
       )}
 
