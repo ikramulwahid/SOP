@@ -68,7 +68,7 @@ export interface StructuredSopDocument {
   purpose: string;
   scope: string;
   definitions: { term: string; definition: string }[];
-  safetyPrecautions: { title: string; desc: string; level: 'Mandatory' | 'Critical Caution' | 'Standard' }[];
+  safetyPrecautions: { title: string; desc: string; level?: 'Mandatory' | 'Critical Caution' | 'Standard' }[];
   apparatus: SopApparatusItem[];
   reagents: string;
   sampleHandling: string;
@@ -97,7 +97,7 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
   let purpose = '';
   let scope = '';
   const definitions: { term: string; definition: string }[] = [];
-  const safetyPrecautions: { title: string; desc: string; level: 'Mandatory' | 'Critical Caution' | 'Standard' }[] = [];
+  const safetyPrecautions: { title: string; desc: string; level?: 'Mandatory' | 'Critical Caution' | 'Standard' }[] = [];
   const apparatus: SopApparatusItem[] = [];
   let reagents = '';
   let sampleHandling = '';
@@ -246,10 +246,18 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
     } else if (currentSection === 'safety') {
       if (line.startsWith('- ') || line.startsWith('* ')) {
         const bulletText = line.replace(/^[-*]\s+/, '').trim();
+        const levelMatch = bulletText.match(/\b(Mandatory|Critical Caution|Standard)\b/i);
+        const level = levelMatch
+          ? (levelMatch[1].toLowerCase() === 'mandatory'
+            ? 'Mandatory'
+            : levelMatch[1].toLowerCase() === 'critical caution'
+              ? 'Critical Caution'
+              : 'Standard')
+          : undefined;
         safetyPrecautions.push({
           title: bulletText.split(/[,:.]/)[0].trim(),
           desc: bulletText,
-          level: bulletText.toLowerCase().includes('must') || bulletText.toLowerCase().includes('ppe') || bulletText.toLowerCase().includes('hazard') || bulletText.toLowerCase().includes('goggles') ? 'Mandatory' : 'Standard'
+          level
         });
       }
     } else if (currentSection === 'apparatus') {
