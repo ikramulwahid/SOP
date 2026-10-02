@@ -12,7 +12,7 @@ import {
   type SOPDocument,
   type SOPBlock,
   type SOPSection
-} from '../src/model/sopDocument';
+} from '../src/model/sopDocument.ts';
 
 function makeSection(id: string, title: string, blocks: SOPBlock[], sections: SOPSection[] = []): SOPSection {
   return { id, title, level: 1, blocks, sections };
