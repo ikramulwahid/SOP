@@ -47,7 +47,7 @@ export const SopFieldEditor: React.FC<SopFieldEditorProps> = ({
   const handleAddApparatus = () => {
     setFormData(prev => ({
       ...prev,
-      apparatus: [...prev.apparatus, { name: 'New Equipment', spec: 'Specification and operating range', tolerance: '±0.1' }]
+      apparatus: [...prev.apparatus, { name: '', spec: '', tolerance: '' }]
     }));
   };
 

@@ -65,7 +65,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
     setIsEnhancing(true);
     setStatusMessage({
       type: 'info',
-      text: 'Structuring and formatting SOP with Gemini AI into ISO/IEC 17025 accredited laboratory schema...'
+      text: 'Structuring and formatting the supplied SOP material into an editable document draft...'
     });
 
     try {
@@ -84,7 +84,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
       onUpdateSop(data.sop);
       setStatusMessage({
         type: 'success',
-        text: `AI Structuring complete! Structured "${data.sop.documentTitle}" with standard ISO 17025 document controls, precision tolerances, and formatted calculations.`
+        text: `AI suggestion prepared for "${data.sop.documentTitle}". Review the result before use.`
       });
     } catch (err: any) {
       console.warn('AI enhancement fallback to local parser:', err);
@@ -131,13 +131,13 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 uppercase tracking-wider mb-1">
             <Layers className="w-4 h-4" />
-            Universal Laboratory Standard Operating Procedure Studio
+            SOP Builder
           </div>
           <h1 className="text-xl font-bold text-slate-900">
-            Create Official ISO/IEC 17025 SOPs for Any Laboratory
+            Create SOPs from your source material
           </h1>
           <p className="text-xs text-slate-500 mt-0.5 max-w-2xl">
-            Build standardized quality documents for <strong>Chemistry, Water/Environmental, Fuels, Food & Dairy, Microbiology, and Pharmaceutical</strong> testing. Input raw text or draft notes to produce printable, compliant SOPs with dynamic calculations and standalone HTML code.
+            Paste source material or draft notes to produce an editable SOP document. The tool does not add regulatory or laboratory-specific claims.
           </p>
         </div>
 
@@ -279,7 +279,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
               ) : (
                 <>
                   <Sparkles className="w-3.5 h-3.5" />
-                  AI Smart Format & Enhance (ISO 17025)
+                  AI Assist
                 </>
               )}
             </button>

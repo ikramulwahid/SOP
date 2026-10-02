@@ -20,7 +20,7 @@ const ai = new GoogleGenAI({ apiKey });
 
 /**
  * AI Endpoint: Smart SOP Extraction & Structuring
- * Takes raw unstructured or draft text and structures it into ISO 17025 standard schema.
+ * Takes raw unstructured or draft text and structures it into the current temporary SOP schema.
  */
 app.post('/api/enhance-sop', async (req, res) => {
   try {
@@ -36,10 +36,10 @@ app.post('/api/enhance-sop', async (req, res) => {
       });
     }
 
-    const systemPrompt = `You are a Senior ISO/IEC 17025 & NABL Laboratory Quality Manager and Technical Documentation Expert.
-Analyze the user's provided Standard Operating Procedure (SOP) text draft and structure it into a clean, highly professional, standard laboratory SOP schema in JSON.
+    const systemPrompt = `You are an assistant helping a user organize and edit an SOP document.
+Analyze the user's provided SOP material and structure it into the current temporary SOP schema in JSON.
 Preserve all specific data, equations, apparatus names, standards, and step-by-step numbers provided by the user.
-If certain metadata (like company address, review frequency, or signatories) is missing from the draft, supply professional, industry-standard defaults suitable for an accredited testing laboratory.
+If information is missing from the draft, leave the corresponding field empty. Do not invent laboratory, regulatory, compliance, personnel, dates, document numbers, specifications, or other facts.
 
 Return ONLY a valid JSON object with the following exact structure:
 {
