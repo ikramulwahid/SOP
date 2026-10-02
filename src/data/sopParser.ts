@@ -172,7 +172,7 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
       }
 
       // Flush previous calculation if any
-      if (currentCalcName && currentFormula) {
+      if (currentFormula) {
         calculations.push({
           name: currentCalcName,
           formula: currentFormula.replace(/\$\$/g, '').trim(),
@@ -209,99 +209,19 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
         }
         currentStepList = [];
         currentStageName = subTitle;
-      } else if (currentSection === 'calculation') {
-        if (currentCalcName && currentFormula) {
-          calculations.push({
-            name: currentCalcName,
-            formula: currentFormula.replace(/\$\$/g, '').trim(),
-            variables: [...currentCalcVariables]
-          });
-          currentFormula = '';
-          currentCalcVariables = [];
-        }
-        currentCalcName = subTitle;
-      }
-      continue;
-    }
-
-    // Fill content according to currentSection
-    if (currentSection === 'purpose') {
-      purpose = purpose ? `${purpose} ${line}` : line;
-    } else if (currentSection === 'scope') {
-      scope = scope ? `${scope} ${line}` : line;
-    } else if (currentSection === 'definitions') {
-      const defMatch = line.match(/\*\*([^*]+)\*\*\s*[:：]\s*(.*)/);
-      if (defMatch) {
-        definitions.push({
-          term: defMatch[1].trim(),
-          definition: defMatch[2].trim()
-        });
-      } else if (line.includes(':')) {
-        const parts = line.split(':');
-        definitions.push({
-          term: parts[0].replace(/[-*]/g, '').trim(),
-          definition: parts.slice(1).join(':').trim()
-        });
-      }
-    } else if (currentSection === 'safety') {
-      if (line.startsWith('- ') || line.startsWith('* ')) {
-        const bulletText = line.replace(/^[-*]\s+/, '').trim();
-        safetyPrecautions.push({
-          title: bulletText.split(/[,:.]/)[0].trim(),
-          desc: bulletText,
-          level: bulletText.toLowerCase().includes('must') || bulletText.toLowerCase().includes('ppe') || bulletText.toLowerCase().includes('hazard') || bulletText.toLowerCase().includes('goggles') ? 'Mandatory' : 'Standard'
-        });
-      }
-    } else if (currentSection === 'apparatus') {
-      if (line.startsWith('- ') || line.startsWith('* ')) {
-        const bullet = line.replace(/^[-*]\s+/, '').trim();
-        const boldMatch = bullet.match(/\*\*([^*]+)\*\*\s*[:：]?\s*(.*)/);
-        if (boldMatch) {
-          apparatus.push({
-            name: boldMatch[1].trim(),
-            spec: boldMatch[2].trim()
-          });
-        } else if (bullet.includes(':')) {
-          const [n, ...rest] = bullet.split(':');
-          apparatus.push({
-            name: n.trim(),
-            spec: rest.join(':').trim(),
-            tolerance: 'Standard'
-          });
-        }
-      }
-    } else if (currentSection === 'reagents') {
-      reagents = reagents === 'Analytical grade reagents and purified water conforming to standard specifications.' ? line : `${reagents} ${line}`;
-    } else if (currentSection === 'sampleHandling') {
-      sampleHandling = sampleHandling ? `${sampleHandling} ${line}` : line;
-    } else if (currentSection === 'procedure') {
-      const stepMatch = line.match(/^(\d+)\.\s+(.*)/);
-      if (stepMatch) {
-        const stepNum = parseInt(stepMatch[1], 10);
-        const fullStepText = stepMatch[2].trim();
-        const titleMatch = fullStepText.match(/\(([^)]+)\)/);
-        const title = titleMatch ? `${titleMatch[1]} Determination` : fullStepText.slice(0, 32) + '...';
-        currentStepList.push({
-          step: stepNum,
-          title: title,
-          text: fullStepText
-        });
-      }
     } else if (currentSection === 'calculation') {
-      if (line.includes('$$') || line.includes('\\frac') || line.includes('=')) {
-        currentFormula = currentFormula ? `${currentFormula} ${line}` : line;
-        if (!currentCalcName) {
-          currentCalcName = 'Analytical Result';
-        }
-      } else if (line.startsWith('- ') && line.includes('=')) {
-        const [sym, desc] = line.replace(/^[-*]\s+/, '').split('=');
-        // Preserve an explicit numeric default only when it is present in the supplied source.
-        const defValMatch = desc ? desc.match(/\[(?:default|val)\s*[:：]?\s*([0-9.]+)\]/i) : null;
+      const variableMatch = line.match(/^[-*]\s+([^=]+?)\s*=\s*(.*)$/);
+      if (variableMatch) {
+        const symbol = variableMatch[1].trim();
+        const desc = variableMatch[2].trim();
+        const defValMatch = desc.match(/\[(?:default|val)\s*[:：]?\s*([0-9.]+)\]/i);
         currentCalcVariables.push({
-          symbol: sym.trim(),
-          description: desc ? desc.replace(/\[[^\]]+\]/g, '').trim() : '',
+          symbol,
+          description: desc.replace(/\[[^\]]+\]/g, '').trim(),
           defaultValue: defValMatch ? parseFloat(defValMatch[1]) : undefined
         });
+      } else if (line.includes('$$') || line.includes('\\frac') || line.includes('=')) {
+        currentFormula = currentFormula ? currentFormula + ' ' + line : line;
       }
     } else if (currentSection === 'references') {
       if (line.startsWith('- ') || line.startsWith('* ')) {
@@ -318,13 +238,13 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
     });
   } else if (currentStepList.length > 0) {
     procedureStages.push({
-      stageName: 'Analytical Protocol',
+      stageName: '',
       steps: [...currentStepList]
     });
   }
 
   // Flush remaining calculation
-  if (currentCalcName && currentFormula) {
+  if (currentFormula) {
     calculations.push({
       name: currentCalcName,
       formula: currentFormula.replace(/\$\$/g, '').trim(),
@@ -347,28 +267,12 @@ export function parseRawSopText(rawText: string): StructuredSopDocument {
     purpose,
     scope,
     definitions,
-    safetyPrecautions: safetyPrecautions.length > 0 ? safetyPrecautions : [
-      { title: 'Personal Protective Equipment', desc: 'Wear approved safety goggles, lab coat, and protective gloves.', level: 'Mandatory' },
-      { title: 'Ventilation', desc: 'Operate all volatile chemical procedures within a functional fume hood.', level: 'Mandatory' }
-    ],
-    apparatus: apparatus.length > 0 ? apparatus : [
-      { name: 'Analytical Balance', spec: 'Readable to 0.1 mg (0.0001 g)', tolerance: '±0.1 mg' },
-      { name: 'Calibrated Glassware', spec: 'Class A volumetric flasks and pipettes', tolerance: 'Class A' }
-    ],
+    safetyPrecautions,
+    apparatus,
     reagents,
     sampleHandling,
     procedureStages,
-    calculations: calculations.length > 0 ? calculations : [
-      {
-        name: 'Analyte Content',
-        formula: 'Result = (A - B) * Factor / Sample_Weight',
-        variables: [
-          { symbol: 'A', description: 'Test reading / final value', defaultValue: 10.0 },
-          { symbol: 'B', description: 'Blank reading / tare', defaultValue: 1.0 },
-          { symbol: 'Sample_Weight', description: 'Weight or volume of test sample', defaultValue: 1.0 }
-        ]
-      }
-    ],
+    calculations,
     references,
     signatories: [],
     revisionHistory: []
