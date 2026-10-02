@@ -306,6 +306,21 @@ function validateSection(section: unknown, path: string, errors: string[]): void
   }
 }
 
+
+function collectImageAssetIds(section: unknown, result: string[]): void {
+  if (!isRecord(section)) return;
+  if (Array.isArray(section.blocks)) {
+    for (const block of section.blocks) {
+      if (isRecord(block) && block.type === 'image' && typeof block.assetId === 'string') {
+        result.push(block.assetId);
+      }
+    }
+  }
+  if (Array.isArray(section.sections)) {
+    for (const child of section.sections) collectImageAssetIds(child, result);
+  }
+}
+
 function validateAsset(asset: unknown, path: string, errors: string[]): void {
   if (!isRecord(asset)) {
     errors.push(`${path} must be an object.`);
@@ -378,6 +393,22 @@ export function validateSOPDocument(value: unknown): ValidationResult {
     errors.push('assets must be an array.');
   } else {
     value.assets.forEach((asset, index) => validateAsset(asset, `assets[${index}]`, errors));
+
+    const assetIds = new Set(
+      value.assets
+        .filter(isRecord)
+        .map(asset => asset.id)
+        .filter(isNonEmptyString)
+    );
+    const referencedAssetIds: string[] = [];
+    if (Array.isArray(value.sections)) {
+      value.sections.forEach(section => collectImageAssetIds(section, referencedAssetIds));
+    }
+    for (const assetId of referencedAssetIds) {
+      if (!assetIds.has(assetId)) {
+        errors.push(`image block references unknown asset "${assetId}".`);
+      }
+    }
   }
 
   if (!isRecord(value.style)) {
