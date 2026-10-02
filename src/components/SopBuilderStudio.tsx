@@ -1,30 +1,16 @@
 import React, { useState } from 'react';
-import { 
-  StructuredSopDocument, 
-  parseRawSopText, 
-  LAB_TEMPLATES_CATALOG,
-  INITIAL_USER_RAW_TEXT 
-} from '../data/sopParser';
+import { StructuredSopDocument, parseRawSopText } from '../data/sopParser';
 import { 
   Sparkles, 
   ArrowRight, 
   FileText, 
-  RotateCcw, 
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
   Scale, 
   Layers, 
-  BookOpen, 
   Wrench,
-  HelpCircle,
-  Zap,
-  FlaskConical,
-  Droplets,
-  Pill,
-  Flame,
-  Milk,
-  Building2
+  Zap
 } from 'lucide-react';
 
 interface SopBuilderStudioProps {
@@ -38,8 +24,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
   onUpdateSop,
   onNavigateToView
 }) => {
-  const [inputText, setInputText] = useState(INITIAL_USER_RAW_TEXT);
-  const [selectedTemplateId, setSelectedTemplateId] = useState('coal_moisture');
+  const [inputText, setInputText] = useState('');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
 
@@ -99,20 +84,6 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
     }
   };
 
-  const handleSelectTemplate = (templateId: string) => {
-    const t = LAB_TEMPLATES_CATALOG.find(item => item.id === templateId);
-    if (t) {
-      setSelectedTemplateId(templateId);
-      setInputText(t.text);
-      const parsed = parseRawSopText(t.text);
-      onUpdateSop(parsed);
-      setStatusMessage({
-        type: 'info',
-        text: `Loaded ${t.domain} standard template: "${t.title}" (${t.docNo}).`
-      });
-    }
-  };
-
   const handleClear = () => {
     setInputText('');
     setStatusMessage(null);
@@ -152,59 +123,6 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
         </div>
       </div>
 
-      {/* Multi-Domain Template Catalog Grid */}
-      <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 uppercase tracking-wider">
-            <BookOpen className="w-4 h-4 text-amber-700" />
-            Select Domain SOP Template or Start from Scratch
-          </div>
-          <button
-            onClick={handleClear}
-            className="text-xs text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
-          >
-            Clear Text Editor
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
-          {LAB_TEMPLATES_CATALOG.map((tpl) => {
-            const isSelected = selectedTemplateId === tpl.id;
-            return (
-              <button
-                key={tpl.id}
-                onClick={() => handleSelectTemplate(tpl.id)}
-                className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                  isSelected 
-                    ? 'bg-amber-50/80 border-amber-400 ring-2 ring-amber-400/20 shadow-xs' 
-                    : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-white'
-                }`}
-              >
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                      {tpl.domain}
-                    </span>
-                    {tpl.id === 'coal_moisture' && <Flame className="w-3.5 h-3.5 text-amber-600" />}
-                    {tpl.id === 'water_bod' && <Droplets className="w-3.5 h-3.5 text-cyan-600" />}
-                    {tpl.id === 'chemistry_titration' && <FlaskConical className="w-3.5 h-3.5 text-blue-600" />}
-                    {tpl.id === 'pharma_assay' && <Pill className="w-3.5 h-3.5 text-emerald-600" />}
-                    {tpl.id === 'dairy_fat' && <Milk className="w-3.5 h-3.5 text-indigo-600" />}
-                  </div>
-                  <h4 className="text-xs font-bold text-slate-900 leading-tight mb-1">
-                    {tpl.title}
-                  </h4>
-                </div>
-                <div className="mt-2 pt-2 border-t border-slate-200/60 flex items-center justify-between text-[10px] font-mono text-slate-500">
-                  <span>{tpl.docNo}</span>
-                  <span className="text-amber-800 font-semibold">{isSelected ? 'Active' : 'Load'}</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Status Alert */}
       {statusMessage && (
         <div className={`p-3.5 rounded-lg border text-xs flex items-center justify-between ${
@@ -238,7 +156,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
         <div className="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col">
           <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-slate-900 text-sm">Laboratory SOP Text Input</span>
+              <span className="font-bold text-slate-900 text-sm">SOP Source Material</span>
               <span className="text-[10px] font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">Markdown / Plain Text</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-slate-400 font-mono">
@@ -326,7 +244,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
           {/* Parsed Modules & Structure Breakdown */}
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-              Parsed Laboratory Modules ({currentSop.procedureStages.length} Stages)
+              Parsed Document Structure ({currentSop.procedureStages.length} Stages)
             </h3>
 
             <div className="space-y-2 text-xs max-h-64 overflow-y-auto pr-1">
@@ -347,7 +265,7 @@ export const SopBuilderStudio: React.FC<SopBuilderStudioProps> = ({
               <div className="p-2.5 border border-slate-200 rounded-lg bg-slate-50/60 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Wrench className="w-3.5 h-3.5 text-slate-600" />
-                  <span className="font-medium text-slate-800">Equipment Catalog</span>
+                  <span className="font-medium text-slate-800">Equipment / Apparatus</span>
                 </div>
                 <span className="font-mono text-[10px] font-bold text-slate-700 bg-slate-200 px-2 py-0.5 rounded">
                   {currentSop.apparatus.length} items
