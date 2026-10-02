@@ -174,7 +174,7 @@ test('rejects malformed tables and images without a valid asset source', () => {
 
   assert.equal(validation.valid, false);
   assert.ok(validation.errors.some(error => error.includes('match the number of header columns')));
-  assert.ok(validation.errors.some(error => error.includes('assets')));
+  assert.ok(validation.errors.some(error => error.includes('unknown asset')));
 });
 
 test('does not execute formula content', () => {
