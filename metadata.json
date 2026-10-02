@@ -1,0 +1,6 @@
+{
+  "name": "Universal Laboratory SOP Studio",
+  "description": "Universal ISO/IEC 17025 Standard Operating Procedure (SOP) Studio & Generator. Create, parse, format, calculate, and export compliant laboratory SOPs from text input.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
