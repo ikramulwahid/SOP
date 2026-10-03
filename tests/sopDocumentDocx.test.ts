@@ -99,13 +99,15 @@ test('builds a DOCX plan with metadata, deterministic numbering, all block types
   ]);
   assert.deepEqual(plan.nodes.filter(node => node.kind === 'heading').map(node => node.text), [
     '1 Scope',
+    'Content heading',
     '1.1 Details',
     '1.1.1 Procedure',
     '2 Records'
   ]);
 
   const kinds = new Set(plan.nodes.map(node => node.kind));
-  for (const kind of ['paragraph', 'heading', 'orderedList', 'bulletList', 'table', 'image', 'formula', 'callout', 'pageBreak']) {
+  const blockKinds = ['paragraph', 'heading', 'orderedList', 'bulletList', 'table', 'image', 'formula', 'callout', 'pageBreak'] as const;
+  for (const kind of blockKinds) {
     assert.ok(kinds.has(kind), 'missing ' + kind);
   }
 
@@ -144,7 +146,7 @@ test('preserves image aspect ratio for supported embedded images', () => {
   const image = plan.nodes.find(node => node.kind === 'image');
 
   assert.ok(image && image.kind === 'image');
-  assert.equal(image.width / image.height, 2, 5e-3);
+  assert.ok(Math.abs(image.width / image.height - 2) < 5e-3);
 });
 
 test('reference-only image assets produce a safe placeholder and never fetch remotely', () => {

@@ -15,10 +15,11 @@ import {
   TextRun,
   WidthType
 } from 'docx';
-import { buildSOPFilename, type SOPAsset } from './sopDocumentFile';
+import { buildSOPFilename } from './sopDocumentFile';
 import {
   validateSOPDocument,
   type HeadingLevel as SOPHeadingLevel,
+  type SOPAsset,
   type SOPBlock,
   type SOPDocument,
   type SOPSection
@@ -67,7 +68,9 @@ const PAGE_SIZE_TWIPS: Record<string, { width: number; height: number }> = {
   LEGAL: { width: 12240, height: 20160 }
 };
 
-const IMAGE_MEDIA_TYPES = new Map([
+type DocxImageType = 'png' | 'jpg' | 'gif' | 'bmp';
+
+const IMAGE_MEDIA_TYPES = new Map<string, DocxImageType>([
   ['image/png', 'png'],
   ['image/jpeg', 'jpg'],
   ['image/jpg', 'jpg'],
@@ -417,15 +420,17 @@ function headingParagraph(
   });
 }
 
-function headingLevel(level: SOPHeadingLevel): HeadingLevel {
-  return ({
-    1: HeadingLevel.HEADING_1,
-    2: HeadingLevel.HEADING_2,
-    3: HeadingLevel.HEADING_3,
-    4: HeadingLevel.HEADING_4,
-    5: HeadingLevel.HEADING_5,
-    6: HeadingLevel.HEADING_6
-  })[level];
+const DOCX_HEADING_LEVELS = {
+  1: HeadingLevel.HEADING_1,
+  2: HeadingLevel.HEADING_2,
+  3: HeadingLevel.HEADING_3,
+  4: HeadingLevel.HEADING_4,
+  5: HeadingLevel.HEADING_5,
+  6: HeadingLevel.HEADING_6
+} as const;
+
+function headingLevel(level: SOPHeadingLevel) {
+  return DOCX_HEADING_LEVELS[level];
 }
 
 function metadataTable(plan: SOPDocxPlan): Table {
@@ -574,6 +579,7 @@ function nodesToDocx(plan: SOPDocxPlan): Array<Paragraph | Table> {
                 height: node.height
               },
               altText: {
+                name: node.assetId,
                 title: node.assetId,
                 description: node.altText
               }
