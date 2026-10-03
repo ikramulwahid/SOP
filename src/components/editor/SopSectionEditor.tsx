@@ -19,6 +19,17 @@ interface Props {
 
 const inputClass = 'w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-base font-semibold text-slate-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100';
 
+export const GENERIC_BLOCK_TYPES = [
+  ['paragraph', 'Paragraph'],
+  ['heading', 'Heading'],
+  ['orderedList', 'Ordered list'],
+  ['bulletList', 'Bullet list'],
+  ['table', 'Table'],
+  ['formula', 'Formula'],
+  ['callout', 'Callout'],
+  ['pageBreak', 'Page break']
+] as const;
+
 const newBlock = (type: SOPBlock['type']): SOPBlock => {
   switch (type) {
     case 'paragraph': return { type, text: '' };
@@ -46,17 +57,6 @@ export const SopSectionEditor: React.FC<Props> = ({
   onDuplicateBlock,
   onDeleteBlock
 }) => {
-export const GENERIC_BLOCK_TYPES = [
-  ['paragraph', 'Paragraph'],
-  ['heading', 'Heading'],
-  ['orderedList', 'Ordered list'],
-  ['bulletList', 'Bullet list'],
-  ['table', 'Table'],
-  ['formula', 'Formula'],
-  ['callout', 'Callout'],
-  ['pageBreak', 'Page break']
-] as const;
-
   return (
     <section className="space-y-4" aria-labelledby={'section-editor-heading-' + section.id}>
       <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
