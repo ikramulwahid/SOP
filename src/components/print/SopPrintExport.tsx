@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FileOutput, X } from 'lucide-react';
 import type { SOPDocument } from '../../model/sopDocument';
 import { validateSOPDocument } from '../../model/sopDocument';
@@ -44,7 +45,7 @@ export const SopPrintExport: React.FC<Props> = ({ document, dirty }) => {
     globalThis.window.print();
   };
 
-  return (
+  const dialog = (
     <div
       id="sop-print-dialog"
       className="fixed inset-0 z-50 overflow-auto bg-slate-900/40 p-3 sm:p-6"
@@ -87,4 +88,6 @@ export const SopPrintExport: React.FC<Props> = ({ document, dirty }) => {
       </div>
     </div>
   );
+
+  return createPortal(dialog, globalThis.document.body);
 };

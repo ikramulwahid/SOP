@@ -224,13 +224,38 @@ export function buildSOPPrintCss(document: SOPDocument): string {
     padding: 0 !important;
     background: #fff !important;
   }
-  body * {
-    visibility: hidden !important;
+
+  #root {
+    display: none !important;
   }
-  #sop-print-document,
-  #sop-print-document * {
-    visibility: visible !important;
+
+  #sop-print-dialog {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
   }
+
+  #sop-print-dialog > div {
+    display: block !important;
+    width: auto !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
   #sop-print-document {
     position: absolute !important;
     left: 0 !important;

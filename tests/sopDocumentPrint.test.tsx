@@ -125,6 +125,9 @@ test('builds print CSS with page size, orientation, margins, and pagination rule
   assert.match(css, /table-header-group/);
   assert.match(css, /font-family:\s*"Georgia"/);
   assert.match(css, /font-size:\s*12px/);
+  assert.match(css, /#root\s*\{\s*display:\s*none\s*!important/);
+  assert.match(css, /#sop-print-dialog\s*\{[\s\S]*?position:\s*static\s*!important/);
+  assert.match(css, /#sop-print-dialog > div\s*\{[\s\S]*?box-shadow:\s*none\s*!important/);
 });
 
 test('uses safe PDF filename behavior derived from WP-04', () => {
