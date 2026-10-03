@@ -5,6 +5,7 @@ import { SopEditorWorkspace } from './components/editor/SopEditorWorkspace';
 import { SopDocumentFileActions } from './components/editor/SopDocumentFileActions';
 import { SopPreviewDialog } from './components/preview/SopPreviewDialog';
 import { SopDocxExport } from './components/editor/SopDocxExport';
+import { SopPrintExport } from './components/print/SopPrintExport';
 
 export default function App() {
   const [initialDocument] = useState<SOPDocument>(() => createEmptySOPDocument());
@@ -80,6 +81,7 @@ export default function App() {
               }}
             />
             <SopDocxExport document={document} dirty={dirty} />
+            <SopPrintExport document={document} dirty={dirty} />
             <button
               type="button"
               onClick={() => setShowPreview(true)}
