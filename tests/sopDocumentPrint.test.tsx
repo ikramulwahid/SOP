@@ -107,6 +107,9 @@ test('renders title, metadata, numbering, all nine block types, styles, and page
   assert.match(html, /15mm/);
   assert.match(html, /20mm/);
   assert.match(html, /25mm/);
+  assert.match(html, /@page/);
+  assert.match(html, /#root\\s*\\{\\s*display:\\s*none\\s*!important/);
+  assert.match(html, /#sop-print-dialog\\s*\\{[\\s\\S]*?position:\\s*static\\s*!important/);
   assert.match(html, /Process diagram/);
   assert.match(html, /Figure 1/);
   assert.match(html, /a \+ b = c/);
