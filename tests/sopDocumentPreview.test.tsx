@@ -112,8 +112,8 @@ test('handles a missing image asset without crashing', () => {
 
 test('rejects invalid documents through the preview validation state', () => {
   const document = sampleDocument();
-  const invalid = structuredClone(document) as unknown as SOPDocument & { schemaVersion: string };
-  invalid.schemaVersion = 'invalid';
+  const invalid = structuredClone(document);
+  (invalid as unknown as { schemaVersion: string }).schemaVersion = 'invalid';
   const html = renderToStaticMarkup(<SopDocumentPreview document={invalid} />);
 
   assert.match(html, /Preview unavailable/);
