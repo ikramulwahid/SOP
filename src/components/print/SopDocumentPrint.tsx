@@ -423,7 +423,9 @@ export const SopDocumentPrint: React.FC<Props> = ({ document }) => {
   };
 
   return (
-    <div id="sop-print-document" data-print-state="valid">
+    <>
+      <style>{buildSOPPrintCss(document)}</style>
+      <div id="sop-print-document" data-print-state="valid">
       <article id="sop-print-page" className="sop-print-page" style={screenPageStyle}>
         <header data-print-header="true">
           <h1>{document.metadata.title || 'Untitled SOP'}</h1>
@@ -446,6 +448,7 @@ export const SopDocumentPrint: React.FC<Props> = ({ document }) => {
           return renderSection(document, section, number);
         })}
       </article>
-    </div>
+      </div>
+    </>
   );
 };
