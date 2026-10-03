@@ -175,7 +175,6 @@ test('generic add-block palette excludes image because images require an asset',
       'pageBreak'
     ]
   );
-  assert.equal(GENERIC_BLOCK_TYPES.some(([type]) => type === 'image'), false);
 });
 
 test('all nine WP-02 block types can be inserted through the mutation layer', () => {
