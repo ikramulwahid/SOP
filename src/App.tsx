@@ -4,6 +4,7 @@ import { createEmptySOPDocument, serializeSOPDocument, type SOPDocument } from '
 import { SopEditorWorkspace } from './components/editor/SopEditorWorkspace';
 import { SopDocumentFileActions } from './components/editor/SopDocumentFileActions';
 import { SopPreviewDialog } from './components/preview/SopPreviewDialog';
+import { SopDocxExport } from './components/editor/SopDocxExport';
 
 export default function App() {
   const [initialDocument] = useState<SOPDocument>(() => createEmptySOPDocument());
@@ -78,6 +79,7 @@ export default function App() {
                 setSourceFilename(filename);
               }}
             />
+            <SopDocxExport document={document} dirty={dirty} />
             <button
               type="button"
               onClick={() => setShowPreview(true)}
