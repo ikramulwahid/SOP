@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { FileOutput, X } from 'lucide-react';
 import type { SOPDocument } from '../../model/sopDocument';
+import { validateSOPDocument } from '../../model/sopDocument';
 import { buildSOPPrintFilename, SopDocumentPrint } from './SopDocumentPrint';
 
 interface Props {
@@ -26,6 +27,7 @@ export const SopPrintExport: React.FC<Props> = ({ document, dirty }) => {
   }
 
   const close = () => setOpen(false);
+  const valid = validateSOPDocument(document).valid;
 
   const print = () => {
     const previousTitle = globalThis.document.title;
@@ -72,7 +74,8 @@ export const SopPrintExport: React.FC<Props> = ({ document, dirty }) => {
             <button
               type="button"
               onClick={print}
-              className="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              disabled={!valid}
+              className="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
             >
               Print / Save PDF
             </button>

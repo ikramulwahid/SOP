@@ -256,7 +256,6 @@ export function buildSOPPrintCss(document: SOPDocument): string {
     padding: 0 !important;
     box-shadow: none !important;
   }
-  .sop-print-section,
   .sop-print-heading,
   .sop-print-image,
   .sop-print-callout,
