@@ -3,12 +3,14 @@ import { Eye, FileText, PlusCircle } from 'lucide-react';
 import { createEmptySOPDocument, serializeSOPDocument, type SOPDocument } from './model/sopDocument';
 import { SopEditorWorkspace } from './components/editor/SopEditorWorkspace';
 import { SopDocumentFileActions } from './components/editor/SopDocumentFileActions';
+import { SopPreviewDialog } from './components/preview/SopPreviewDialog';
 
 export default function App() {
   const [initialDocument] = useState<SOPDocument>(() => createEmptySOPDocument());
   const [document, setDocument] = useState<SOPDocument>(initialDocument);
   const [baseline, setBaseline] = useState(() => serializeSOPDocument(initialDocument));
   const [sourceFilename, setSourceFilename] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
 
   const dirty = useMemo(() => {
     try {
@@ -24,6 +26,7 @@ export default function App() {
     setDocument(next);
     setBaseline(serializeSOPDocument(next));
     setSourceFilename('');
+    setShowPreview(false);
   };
 
   return (
@@ -67,6 +70,7 @@ export default function App() {
                 setDocument(next);
                 setBaseline(serializeSOPDocument(next));
                 setSourceFilename(filename);
+                setShowPreview(false);
                 return true;
               }}
               onSaved={filename => {
@@ -76,9 +80,10 @@ export default function App() {
             />
             <button
               type="button"
-              disabled
-              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-400"
-              title="Preview will be implemented in a later work package"
+              onClick={() => setShowPreview(true)}
+              className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              aria-label="Open SOP preview"
+              title="Open read-only SOP preview"
             >
               <Eye className="h-3.5 w-3.5" /> Preview
             </button>
@@ -91,6 +96,9 @@ export default function App() {
       <footer className="border-t border-slate-200 bg-white py-5 text-center text-[11px] text-slate-500">
         Single-user SOP authoring workspace · local .sop.json files
       </footer>
+      {showPreview && (
+        <SopPreviewDialog document={document} onClose={() => setShowPreview(false)} />
+      )}
     </div>
   );
 }
