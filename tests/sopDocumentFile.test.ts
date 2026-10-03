@@ -6,6 +6,7 @@ import test from 'node:test';
 import { createEmptySOPDocument, deserializeSOPDocument, serializeSOPDocument } from '../src/model/sopDocument.ts';
 import {
   buildSOPFilename,
+  createAssetId,
   createEmbeddedImageAsset,
   createSOPFile,
   readSOPDocumentFile
@@ -89,6 +90,28 @@ test('sanitizes unsafe filename characters and provides a fallback', () => {
   document.metadata.documentNumber = '';
   document.metadata.title = '';
   assert.equal(buildSOPFilename(document), 'untitled.sop.json');
+});
+
+test('creates an asset ID when crypto.randomUUID is unavailable', () => {
+  const originalCrypto = globalThis.crypto;
+
+  try {
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: {}
+    });
+
+    const existing = new Set(['asset-existing']);
+    const id = createAssetId(existing);
+
+    assert.match(id, /^asset-/);
+    assert.ok(!existing.has(id));
+  } finally {
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: originalCrypto
+    });
+  }
 });
 
 test('creates embedded image assets with the approved WP-02 asset structure', () => {

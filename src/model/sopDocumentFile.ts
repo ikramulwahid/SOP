@@ -121,7 +121,10 @@ export function createAssetId(existingIds: Iterable<string>): string {
   const usedIds = new Set(existingIds);
   let id = '';
   do {
-    id = 'asset-' + globalThis.crypto.randomUUID();
+    id = 'asset-' + (
+      globalThis.crypto?.randomUUID?.() ??
+      Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10)
+    );
   } while (usedIds.has(id));
   return id;
 }
