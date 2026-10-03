@@ -106,8 +106,8 @@ test('handles a missing image asset without crashing', () => {
   document.sections[0].blocks = [{ type: 'image', assetId: 'missing-asset', altText: 'Missing diagram' }];
 
   const html = renderToStaticMarkup(<SopDocumentPreview document={document} />);
-  assert.match(html, /Image data unavailable for asset missing-asset/);
-  assert.match(html, /Missing diagram/);
+  assert.match(html, /Preview unavailable/);
+  assert.match(html, /image block references unknown asset .*missing-asset/i);
 });
 
 test('rejects invalid documents through the preview validation state', () => {
