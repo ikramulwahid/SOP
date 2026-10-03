@@ -29,7 +29,7 @@ export interface SOPDocxImageNode {
   kind: 'image';
   assetId: string;
   data: Uint8Array;
-  mediaType: string;
+  mediaType: DocxImageType;
   width: number;
   height: number;
   altText: string;
