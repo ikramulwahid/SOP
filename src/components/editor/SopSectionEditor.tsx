@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Plus } from 'lucide-react';
 import type { SOPBlock, SOPSection, SOPAsset } from '../../model/sopDocument';
 import { SopBlockEditor } from './SopBlockEditor';
@@ -46,17 +46,16 @@ export const SopSectionEditor: React.FC<Props> = ({
   onDuplicateBlock,
   onDeleteBlock
 }) => {
-  const blockTypes = useMemo(() => ([
-    ['paragraph', 'Paragraph'],
-    ['heading', 'Heading'],
-    ['orderedList', 'Ordered list'],
-    ['bulletList', 'Bullet list'],
-    ['table', 'Table'],
-    ['image', 'Image'],
-    ['formula', 'Formula'],
-    ['callout', 'Callout'],
-    ['pageBreak', 'Page break']
-  ] as const), []);
+export const GENERIC_BLOCK_TYPES = [
+  ['paragraph', 'Paragraph'],
+  ['heading', 'Heading'],
+  ['orderedList', 'Ordered list'],
+  ['bulletList', 'Bullet list'],
+  ['table', 'Table'],
+  ['formula', 'Formula'],
+  ['callout', 'Callout'],
+  ['pageBreak', 'Page break']
+] as const;
 
   return (
     <section className="space-y-4" aria-labelledby={'section-editor-heading-' + section.id}>
@@ -101,7 +100,7 @@ export const SopSectionEditor: React.FC<Props> = ({
       <div className="rounded-lg border border-dashed border-slate-300 bg-white p-4">
         <div className="mb-2 text-xs font-semibold text-slate-700">Add block</div>
         <div className="flex flex-wrap gap-2">
-          {blockTypes.map(([type, label]) => (
+          {GENERIC_BLOCK_TYPES.map(([type, label]) => (
             <button
               type="button"
               key={type}

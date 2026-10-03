@@ -27,6 +27,7 @@ import {
   updateSection,
   updateStyle
 } from '../src/model/sopDocumentEditor.ts';
+import { GENERIC_BLOCK_TYPES } from '../src/components/editor/SopSectionEditor.tsx';
 
 function documentWithSections(): SOPDocument {
   let document = createEmptySOPDocument();
@@ -158,6 +159,23 @@ test('metadata, revision history, style, and assets use WP-02 structures', () =>
   const sectionId = document.sections[0].id;
   document = addBlock(document, sectionId, { type: 'image', assetId: 'asset-1' });
   assert.equal(validateSOPDocument(document).valid, true);
+});
+
+test('generic add-block palette excludes image because images require an asset', () => {
+  assert.deepEqual(
+    GENERIC_BLOCK_TYPES.map(([type]) => type),
+    [
+      'paragraph',
+      'heading',
+      'orderedList',
+      'bulletList',
+      'table',
+      'formula',
+      'callout',
+      'pageBreak'
+    ]
+  );
+  assert.equal(GENERIC_BLOCK_TYPES.some(([type]) => type === 'image'), false);
 });
 
 test('all nine WP-02 block types can be inserted through the mutation layer', () => {
